@@ -92,7 +92,7 @@ if __name__ == "__main__":
                                                             1024))
         if len(confidences) > 0 and (readfile() > 34):
             print(" [GPT-3]")
-            parallel(" Yes master?")
+            parallel(" Can I help you?")
             print("\n [{0}] ".format(ids[0]))
             textUser = Stt.STT_google()
             if textUser:
