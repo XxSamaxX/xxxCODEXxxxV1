@@ -78,14 +78,14 @@ def load_fine_tuning(file):
 
 def auto_match(text, full=False, user="unknown"):
     predict = requests(text, user, full,
-                       load_fine_tuning("S:/IA/PycharmProjects/pythonProject/bin/tuning-PREDICT"))
+                       load_fine_tuning("./bin/tuning-PREDICT"))
     if predict.split('[GPT-3]')[1].find("[TALK]") != -1:
         result = requests(text, user, full,
-                          load_fine_tuning("S:/IA/PycharmProjects/pythonProject/bin/tuning-TALK"))
+                          load_fine_tuning("./bin/tuning-TALK"))
         return result
     if predict.split('[GPT-3]')[1].find("[COMMAND]") != -1:
         result = requests(text, user, full,
-                          load_fine_tuning("S:/IA/PycharmProjects/pythonProject/bin/tuning-COMMANDS"))
+                          load_fine_tuning("./bin/tuning-COMMANDS"))
         ajust = result.split('[GPT-3]')[1].split('**')[0]
         print(result.split('[GPT-3]')[1].split('**')[1])
         return ajust
