@@ -1,10 +1,14 @@
 import openai
+import subprocess
+import os
 
 
-def requests(textInput="None", id="unknown", full=False):
+
+def requests(textInput="None", id="unknown", full=False, finetuning=""):
     try:
-        openai.api_key = '[--PUT HERE KEY CODE FOR RUN--]'
-        finetuning = "Hola, me presento, soy Samuel y soy estudiante de ingenieria informatica. Soy en parte tu creador " \
+        openai.api_key = 'PUT KEY HERE'
+        if finetuning == "":
+            finetuning = "Hola, me presento, soy Samuel y soy estudiante de ingenieria informatica. Soy en parte tu creador " \
                  "dentro del script. Tu eres un asistente virtual capaz de conversar, siempre de forma amigable y " \
                  "respetuosa. Tu mision es encargarte de responder cualquier cosa que se te plantee. " \
                  "Las conversaciones serán de tipo [Nombre] <frase o pregunta>. Y tú responderás como " \
@@ -36,6 +40,19 @@ def requests(textInput="None", id="unknown", full=False):
         content = response.choices[0].text.split('['+id+']')
         #print(content[0])
         # return response.choices[0].text //full text(no necesario de momento...
+        if finetuning != "":
+            # content[0] es el tiene el comando por lo que hay que comprobar en que formato esta, de momento solo cmd y powershell
+            # comprobar primero si hay escrito entre [] cmd o powershell
+            if content[0].find("[cmd]") != -1:
+                command = content[0].split("[cmd]")[1]
+                cammand = command.strip()
+                execute(command, ps=False)
+            elif content[0].find("[powershell]") != -1:
+                command = content[0].split("[powershell]")[1]
+                cammand = command.strip()
+                execute(command, ps=True)
+            else:
+                return content[0]
         if full:
             return response.choices[0].text
         return content[0]
@@ -44,10 +61,41 @@ def requests(textInput="None", id="unknown", full=False):
         return None
 
 
+def execute(command, ps=False):
+    if os.name == 'nt':
+        if ps:
+            #ps means powershell so we must use powershell.exe
+            subprocess.call(['powershell.exe', command])
+        else:
+            #cmd means cmd.exe
+            subprocess.call(['cmd.exe', '/c', command])
+
+
+def load_fine_tuning(file):
+    with open(file, 'r', encoding='utf-8') as f:
+        return f.read()
+
+
+def auto_match(text, full=False, user="unknown"):
+    predict = requests(text, user, full,
+                       load_fine_tuning("S:/IA/PycharmProjects/pythonProject/bin/tuning-PREDICT"))
+    if predict.split('[GPT-3]')[1].find("[TALK]") != -1:
+        result = requests(text, user, full,
+                          load_fine_tuning("S:/IA/PycharmProjects/pythonProject/bin/tuning-TALK"))
+        return result
+    if predict.split('[GPT-3]')[1].find("[COMMAND]") != -1:
+        result = requests(text, user, full,
+                          load_fine_tuning("S:/IA/PycharmProjects/pythonProject/bin/tuning-COMMANDS"))
+        ajust = result.split('[GPT-3]')[1].split('**')[0]
+        print(result.split('[GPT-3]')[1].split('**')[1])
+        return ajust
+    return predict
+
+
 if __name__ == "__main__":
     while True:
         text = input("[Samuel] ")
         if text == "exit":
             break
-        result = requests(text, "Samuel", True)
-        print(result)
+        #result = requests(text, "Samuel", True)
+        auto_match(text, False, "Samuel")

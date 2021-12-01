@@ -52,20 +52,21 @@ def waitingkey(id, keyword="exit"):
     return False
 
 
-def traduction(path="./wavsamples/Morgan"):
+def traduction(path="./wavsamples/Morgan", language="en-EN"):
     textReturn = ""
     r = sr.Recognizer()
     for filename in os.listdir(path):
         if filename.endswith(".wav"):
-            print(filename)
+            print(filename+" ===>"+"["+str(round(len(os.listdir(path))/len(os.listdir(path))*100, 2))+"%]")
             with sr.AudioFile(path+"/"+filename) as source:
                 audio = r.record(source)
             try:
-                text = r.recognize_google(audio, language="en-EN")
+                text = r.recognize_google(audio, language=language)
                 print(text)
                 with open(path+"/"+"list.txt", "w") as f:
                     # Save write to return later
-                    textReturn = textReturn + "wavs/" + filename + " | " + text + "\n"
+                    # textReturn = textReturn + "wavs/" + filename + " | " + text + "\n"
+                    textReturn = textReturn + text + "\n"
                     f.write(textReturn)
             except:
                 print("Error")
